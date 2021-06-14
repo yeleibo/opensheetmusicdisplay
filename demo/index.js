@@ -98,7 +98,7 @@ import { TransposeCalculator } from '../src/Plugins/Transpose/TransposeCalculato
         selectPageSizes,
         printPdfBtns,
         transpose,
-        transposeBtn;
+        transposeBtn,svgInfoBtn;
     
     // manage option setting and resetting for specific samples, e.g. in the autobeam sample autobeam is set to true, otherwise reset to previous state
     // TODO design a more elegant option state saving & restoring system, though that requires saving the options state in OSMD
@@ -251,6 +251,11 @@ import { TransposeCalculator } from '../src/Plugins/Transpose/TransposeCalculato
         transpose = document.getElementById('transpose');
         transposeBtn = document.getElementById('transpose-btn');
 
+
+        svgInfoBtn = document.getElementById('svgInfo');
+        svgInfoBtn.onclick=function (){
+            openSheetMusicDisplay.exportSVGInfo();
+        }
         //var defaultDisplayVisibleValue = "block"; // TODO in some browsers flow could be the better/default value
         var defaultVisibilityValue = "visible";
         var devDemoRunning = process.env.OSMD_DEBUG_CONTROLS;
@@ -436,6 +441,7 @@ import { TransposeCalculator } from '../src/Plugins/Transpose/TransposeCalculato
         openSheetMusicDisplay = new OpenSheetMusicDisplay(canvas, {
             autoResize: true,
             backend: backendType,
+
             //backend: "canvas",
             disableCursor: false,
             drawingParameters: compactMode ? "compact" : "default", // try compact (instead of default)

@@ -9,6 +9,7 @@ import { SvgVexFlowBackend } from "./../MusicalScore/Graphical/VexFlow/SvgVexFlo
 import { CanvasVexFlowBackend } from "./../MusicalScore/Graphical/VexFlow/CanvasVexFlowBackend";
 import { MusicSheet } from "./../MusicalScore/MusicSheet";
 import { Cursor } from "./Cursor";
+import {SvgInfoModel, MeasureInfoModel, VoiceInfoModel, StaffInfoModel, NoteInfoModel} from "./SvgInfoModel";
 import { MXLHelper } from "../Common/FileIO/Mxl";
 import { AJAX } from "./AJAX";
 import log from "loglevel";
@@ -22,6 +23,9 @@ import { GraphicalMusicPage } from "../MusicalScore/Graphical/GraphicalMusicPage
 import { MusicPartManagerIterator } from "../MusicalScore/MusicParts/MusicPartManagerIterator";
 import { ITransposeCalculator } from "../MusicalScore/Interfaces/ITransposeCalculator";
 import { NoteEnum } from "../Common/DataObjects/Pitch";
+import {GraphicalMeasure, VexFlowGraphicalNote} from "../MusicalScore/Graphical";
+
+
 
 /**
  * The main class and control point of OpenSheetMusicDisplay.<br>
@@ -338,6 +342,43 @@ export class OpenSheetMusicDisplay {
         }
     }
 
+    public exportSVGInfo(): void {
+        const svgInfo: SvgInfoModel= new SvgInfoModel();
+        svgInfo.svgId="fsd";
+        //第一维代表分节，第二维代表这个分节有多少个横行,即左右手
+       const graphicSheet: GraphicalMeasure[][] = this.GraphicSheet.MeasureList;
+       //分节数遍历
+        graphicSheet.forEach(element1=> {
+           element1.forEach(element2=>  {
+               const measureInfoModel: MeasureInfoModel=new MeasureInfoModel();
+               svgInfo.measures.push(measureInfoModel);
+               measureInfoModel.staffs=[];
+               measureInfoModel.verticalIndexOfSheetMusic=element2.MeasureNumber-1;
+               measureInfoModel.horizontalIndexOfSheetMusic=element1.indexOf(element2);
+               element2.staffEntries.forEach(staff=>{
+                   const staffInfoModel: StaffInfoModel=new StaffInfoModel();
+                   staffInfoModel.verticalIndexOfMeasure=element2.staffEntries.indexOf(staff);
+                   measureInfoModel.staffs.push(staffInfoModel);
+                   staff.graphicalVoiceEntries.forEach(voice=> {
+                       const voiceInfoModel: VoiceInfoModel=new VoiceInfoModel();
+                       voiceInfoModel.verticalIndexOfStaff= staff.graphicalVoiceEntries.indexOf(voice);
+                       staffInfoModel.voices.push(voiceInfoModel);
+                       voice.notes.forEach(note=> {
+                            const  noteInfoModel: NoteInfoModel=new NoteInfoModel();
+                            voiceInfoModel.notes.push(noteInfoModel);
+                            noteInfoModel.verticalIndexOfVoice=voice.notes.indexOf(note);
+                            console.log(note instanceof VexFlowGraphicalNote);
+                            if(note instanceof  VexFlowGraphicalNote){
+                                noteInfoModel.svgId= (note as VexFlowGraphicalNote).vfnote[0].getAttribute("id");
+                            }
+                            //noteInfoModel.svgId=note.sourceNote;
+                       });
+                   });
+               });
+           });
+        });
+        console.log(svgInfo);
+    }
     /** States whether the render() function can be safely called. */
     public IsReadyToRender(): boolean {
         return this.graphic !== undefined;
