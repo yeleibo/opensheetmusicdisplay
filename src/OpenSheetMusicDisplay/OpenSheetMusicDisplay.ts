@@ -9,7 +9,14 @@ import { SvgVexFlowBackend } from "./../MusicalScore/Graphical/VexFlow/SvgVexFlo
 import { CanvasVexFlowBackend } from "./../MusicalScore/Graphical/VexFlow/CanvasVexFlowBackend";
 import { MusicSheet } from "./../MusicalScore/MusicSheet";
 import { Cursor } from "./Cursor";
-import {SvgInfoModel, MeasureInfoModel, VoiceInfoModel, StaffInfoModel, NoteInfoModel} from "./SvgInfoModel";
+import {
+    SheetMusicInfoModel,
+    MeasureInfoModel,
+    VoiceInfoModel,
+    StaffInfoModel,
+    NoteInfoModel,
+    MeasureHandInfoModel
+} from "./SheetMusicInfoModel";
 import { MXLHelper } from "../Common/FileIO/Mxl";
 import { AJAX } from "./AJAX";
 import log from "loglevel";
@@ -24,6 +31,7 @@ import { MusicPartManagerIterator } from "../MusicalScore/MusicParts/MusicPartMa
 import { ITransposeCalculator } from "../MusicalScore/Interfaces/ITransposeCalculator";
 import { NoteEnum } from "../Common/DataObjects/Pitch";
 import {GraphicalMeasure, VexFlowGraphicalNote} from "../MusicalScore/Graphical";
+import StemmableNote = Vex.Flow.StemmableNote;
 
 
 
@@ -333,43 +341,59 @@ export class OpenSheetMusicDisplay {
     }
 
     // for now SVG only, see generateImages_browserless (PNG/SVG)
-    public exportSVG(): void {
+    public exportSVG(): string {
         for (const backend of this.drawer?.Backends) {
             if (backend instanceof SvgVexFlowBackend) {
-                (backend as SvgVexFlowBackend).export();
+                return  (backend as SvgVexFlowBackend).export();
             }
             // if we add CanvasVexFlowBackend exporting, rename function to export() or exportImages() again
         }
     }
 
-    public exportSVGInfo(): void {
-        const svgInfo: SvgInfoModel= new SvgInfoModel();
-        svgInfo.svgId="fsd";
+    public exportSVGInfo(isSingeLine: boolean): void {
+        const sheetMusicInfoModel: SheetMusicInfoModel= new SheetMusicInfoModel();
+        if(isSingeLine) {
+            sheetMusicInfoModel.singleLineSvgFileContent = this.exportSVG();
+        }else{
+            sheetMusicInfoModel.multiLineSvgFileContent = this.exportSVG();
+        }
         //第一维代表分节，第二维代表这个分节有多少个横行,即左右手
-       const graphicSheet: GraphicalMeasure[][] = this.GraphicSheet.MeasureList;
+       const measureList: GraphicalMeasure[][] = this.GraphicSheet.MeasureList;
        //分节数遍历
-        graphicSheet.forEach(element1=> {
+        measureList.forEach(element1=> {
+            //解析分节
+            const measureInfoModel: MeasureInfoModel=new MeasureInfoModel();
+            measureInfoModel.verticalIndexOfSheetMusic=measureList.indexOf(element1);
+            if(isSingeLine){
+                sheetMusicInfoModel.singleLineSvgMeasures.push(measureInfoModel);
+            }else{
+                sheetMusicInfoModel.multiLineSvgMeasures.push(measureInfoModel);
+            }
+
            element1.forEach(element2=>  {
-               const measureInfoModel: MeasureInfoModel=new MeasureInfoModel();
-               svgInfo.measures.push(measureInfoModel);
-               measureInfoModel.staffs=[];
-               measureInfoModel.verticalIndexOfSheetMusic=element2.MeasureNumber-1;
-               measureInfoModel.horizontalIndexOfSheetMusic=element1.indexOf(element2);
+               const measureHandInfoModel: MeasureHandInfoModel=new MeasureHandInfoModel();
+               measureInfoModel.measureHandInfoModels.push(measureHandInfoModel);
+               measureHandInfoModel.horizontalIndexOfSheetMusic=element1.indexOf(element2);
                element2.staffEntries.forEach(staff=>{
+                   //解析staff
                    const staffInfoModel: StaffInfoModel=new StaffInfoModel();
                    staffInfoModel.verticalIndexOfMeasure=element2.staffEntries.indexOf(staff);
-                   measureInfoModel.staffs.push(staffInfoModel);
+                   measureHandInfoModel.staffs.push(staffInfoModel);
                    staff.graphicalVoiceEntries.forEach(voice=> {
+                       //解析voice
                        const voiceInfoModel: VoiceInfoModel=new VoiceInfoModel();
                        voiceInfoModel.verticalIndexOfStaff= staff.graphicalVoiceEntries.indexOf(voice);
                        staffInfoModel.voices.push(voiceInfoModel);
                        voice.notes.forEach(note=> {
+                           //解析note
                             const  noteInfoModel: NoteInfoModel=new NoteInfoModel();
                             voiceInfoModel.notes.push(noteInfoModel);
                             noteInfoModel.verticalIndexOfVoice=voice.notes.indexOf(note);
-                            console.log(note instanceof VexFlowGraphicalNote);
                             if(note instanceof  VexFlowGraphicalNote){
-                                noteInfoModel.svgId= (note as VexFlowGraphicalNote).vfnote[0].getAttribute("id");
+                              const stemmableNote: StemmableNote=(note as VexFlowGraphicalNote).vfnote[0];
+                                const vexFlowNoteIndex: number=(note as VexFlowGraphicalNote).vfnote[1];
+                                noteInfoModel.svgId= stemmableNote.getAttribute("id");
+                                noteInfoModel.index=vexFlowNoteIndex;
                             }
                             //noteInfoModel.svgId=note.sourceNote;
                        });
@@ -377,7 +401,8 @@ export class OpenSheetMusicDisplay {
                });
            });
         });
-        console.log(svgInfo);
+       // console.log(sheetMusicInfoModel);
+       // console.log(JSON.stringify(sheetMusicInfoModel));
     }
     /** States whether the render() function can be safely called. */
     public IsReadyToRender(): boolean {

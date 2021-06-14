@@ -1,13 +1,24 @@
-///svg相关的信息
-export class SvgInfoModel{
-    public  svgId: string;
+///乐谱相关的信息
+export class SheetMusicInfoModel{
 
-    public measures: MeasureInfoModel[]=[];
+    //一行的svg的内容
+    public singleLineSvgFileContent: String;
+    //多行svg展示的内容
+    public multiLineSvgFileContent: String;
+    //svg里的分节信息
+    public singleLineSvgMeasures: MeasureInfoModel[]=[];
+    //svg里的分节信息
+    public multiLineSvgMeasures: MeasureInfoModel[]=[];
 }
 ///分节的信息模型
 export  class MeasureInfoModel{
     //分节的index
     public verticalIndexOfSheetMusic: number;
+    //分节的左右手模型
+    public measureHandInfoModels: MeasureHandInfoModel[]=[];
+}
+///分节的左右手模型
+export class MeasureHandInfoModel{
     public horizontalIndexOfSheetMusic: number;
     public staffs: StaffInfoModel[]=[];
 }
@@ -24,5 +35,6 @@ export  class  VoiceInfoModel{
 
 export  class NoteInfoModel {
     public verticalIndexOfVoice: number;
+    public index: number;
     public svgId: string;
 }

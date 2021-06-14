@@ -206,7 +206,7 @@ export class SvgVexFlowBackend extends VexFlowBackend {
         this.ctx.fill();
     }
 
-    public export(): void {
+    public export(): string {
         // See: https://stackoverflow.com/questions/38477972/javascript-save-svg-element-to-file-on-disk
 
         // first create a clone of our svg node so we don't mess the original one
@@ -239,5 +239,6 @@ export class SvgVexFlowBackend extends VexFlowBackend {
         a.download = "opensheetmusicdisplay_download.svg";
         a.innerHTML = window.location.href + "/download";
         document.body.appendChild(a);
+        return  svgData;
       }
 }
