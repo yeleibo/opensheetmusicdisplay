@@ -6,19 +6,15 @@ export class SheetMusicInfoModel{
     //多行svg展示的内容
     public multiLineSvgFileContent: String;
     //svg里的分节信息
-    public singleLineSvgMeasures: MeasureInfoModel[]=[];
+    public singleLineSvgMeasures: VerticalStaffsInfoModel[]=[];
     //svg里的分节信息
-    public multiLineSvgMeasures: MeasureInfoModel[]=[];
-}
-///分节的信息模型
-export  class MeasureInfoModel{
-    //分节的index
-    public verticalIndexOfSheetMusic: number;
-    //垂直的staff组
-    public verticalStaffs: VerticalStaffsInfoModel[]=[];
+    public multiLineSvgMeasures: VerticalStaffsInfoModel[]=[];
 }
 
+
 export class VerticalStaffsInfoModel{
+    public measureIndex: number;
+    public horizontalIndexOfMeasure: number;
     public verticalIndexOfSheetMusic: number;
     public staffs: StaffInfoModel[]=[];
 }

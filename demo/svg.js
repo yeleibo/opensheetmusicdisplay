@@ -111,6 +111,6 @@ import {OpenSheetMusicDisplay} from "../src/OpenSheetMusicDisplay";
     const svgInfoBtn = document.getElementById('svgInfo');
     svgInfoBtn.onclick=function () {
         singeLineSvgOpenSheetMusicDisplay.exportSVGInfo(true);
-        multiLineSvgOpenSheetMusicDisplay.exportSVGInfo(false);
+        //multiLineSvgOpenSheetMusicDisplay.exportSVGInfo(false);
     }
 }())
