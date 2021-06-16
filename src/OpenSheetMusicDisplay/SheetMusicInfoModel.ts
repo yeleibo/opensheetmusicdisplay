@@ -14,16 +14,16 @@ export class SheetMusicInfoModel{
 export  class MeasureInfoModel{
     //分节的index
     public verticalIndexOfSheetMusic: number;
-    //分节的左右手模型
-    public measureHandInfoModels: MeasureHandInfoModel[]=[];
+    //垂直的staff组
+    public verticalStaffs: VerticalStaffsInfoModel[]=[];
 }
-///分节的左右手模型
-export class MeasureHandInfoModel{
-    public horizontalIndexOfSheetMusic: number;
+
+export class VerticalStaffsInfoModel{
+    public verticalIndexOfSheetMusic: number;
     public staffs: StaffInfoModel[]=[];
 }
 export  class StaffInfoModel {
-    public verticalIndexOfMeasure: number;
+    public horizontalIndexOVerticalStaffs: number;
     public voices: VoiceInfoModel[]=[];
 }
 
@@ -36,7 +36,6 @@ export  class  VoiceInfoModel{
 ///音符的信息模型
 export  class NoteInfoModel {
     public verticalIndexOfVoice: number;
-    public index: number;
     public pianoKey: number;
     //svg的路径
     public svgPath: string;

@@ -14,8 +14,7 @@ import {
     MeasureInfoModel,
     VoiceInfoModel,
     StaffInfoModel,
-    NoteInfoModel,
-    MeasureHandInfoModel
+    NoteInfoModel, VerticalStaffsInfoModel,
 } from "./SheetMusicInfoModel";
 import { MXLHelper } from "../Common/FileIO/Mxl";
 import { AJAX } from "./AJAX";
@@ -30,8 +29,9 @@ import { GraphicalMusicPage } from "../MusicalScore/Graphical/GraphicalMusicPage
 import { MusicPartManagerIterator } from "../MusicalScore/MusicParts/MusicPartManagerIterator";
 import { ITransposeCalculator } from "../MusicalScore/Interfaces/ITransposeCalculator";
 import { NoteEnum } from "../Common/DataObjects/Pitch";
-import {GraphicalMeasure, VexFlowGraphicalNote} from "../MusicalScore/Graphical";
 import StaveNote = Vex.Flow.StaveNote;
+import {SourceMeasure} from "../MusicalScore/VoiceData";
+import {VexFlowGraphicalNote} from "../MusicalScore/Graphical/VexFlow";
 
 
 
@@ -362,61 +362,60 @@ export class OpenSheetMusicDisplay {
             sheetMusicInfoModel.multiLineSvgFileContent = this.exportSVG();
         }
         //第一维代表分节，第二维代表这个分节有多少个横行,即左右手
-       const measureList: GraphicalMeasure[][] = this.GraphicSheet.MeasureList;
+       const measureList: SourceMeasure[] = this.sheet.SourceMeasures;
        //分节数遍历
-        measureList.forEach(element1=> {
+        measureList.forEach(measure=> {
             //解析分节
             const measureInfoModel: MeasureInfoModel=new MeasureInfoModel();
-            measureInfoModel.verticalIndexOfSheetMusic=measureList.indexOf(element1);
+            measureInfoModel.verticalIndexOfSheetMusic=measure.measureListIndex;
             if(isSingeLine){
                 sheetMusicInfoModel.singleLineSvgMeasures.push(measureInfoModel);
             }else{
                 sheetMusicInfoModel.multiLineSvgMeasures.push(measureInfoModel);
             }
 
-           element1.forEach(element2=>  {
-               const measureHandInfoModel: MeasureHandInfoModel=new MeasureHandInfoModel();
-               measureInfoModel.measureHandInfoModels.push(measureHandInfoModel);
-               measureHandInfoModel.horizontalIndexOfSheetMusic=element1.indexOf(element2);
-               element2.staffEntries.forEach(staff=>{
+           measure.VerticalSourceStaffEntryContainers.forEach(verticalGroupStaffs=>  {
+               const verticalStaffsInfoModel: VerticalStaffsInfoModel=new VerticalStaffsInfoModel();
+               measureInfoModel.verticalStaffs.push(verticalStaffsInfoModel);
+               verticalStaffsInfoModel.verticalIndexOfSheetMusic=measure.VerticalSourceStaffEntryContainers.indexOf(verticalGroupStaffs);
+               verticalGroupStaffs.StaffEntries.forEach(staff=>{
                    //解析staff
                    const staffInfoModel: StaffInfoModel=new StaffInfoModel();
-                   staffInfoModel.verticalIndexOfMeasure=element2.staffEntries.indexOf(staff);
-                   measureHandInfoModel.staffs.push(staffInfoModel);
-                   staff.graphicalVoiceEntries.forEach(voice=> {
+                   staffInfoModel.horizontalIndexOVerticalStaffs=verticalGroupStaffs.StaffEntries.indexOf(staff);
+                   verticalStaffsInfoModel.staffs.push(staffInfoModel);
+                   staff.VoiceEntries.forEach(voice=> {
                        //解析voice
                        const voiceInfoModel: VoiceInfoModel=new VoiceInfoModel();
-                       voiceInfoModel.verticalIndexOfStaff= staff.graphicalVoiceEntries.indexOf(voice);
+                       voiceInfoModel.verticalIndexOfStaff=  staff.VoiceEntries.indexOf(voice);
                        staffInfoModel.voices.push(voiceInfoModel);
-                       voice.notes.forEach(note=> {
+                       voice.Notes.forEach(note=> {
                            //解析note
                             const  noteInfoModel: NoteInfoModel=new NoteInfoModel();
                             voiceInfoModel.notes.push(noteInfoModel);
-                            noteInfoModel.verticalIndexOfVoice=voice.notes.indexOf(note);
+                           noteInfoModel.pianoKey=note.halfTone;
                             if(note instanceof  VexFlowGraphicalNote){
                                 const gNote: VexFlowGraphicalNote=note as VexFlowGraphicalNote;
                                 const stemmableNote: StaveNote=gNote.vfnote[0] as StaveNote;
                                 const vexFlowNoteIndex: number=gNote.vfnote[1];
                                 voiceInfoModel.svgId= "vf-"+stemmableNote.getAttribute("id");
-                                noteInfoModel.index=vexFlowNoteIndex;
-                                noteInfoModel.pianoKey=stemmableNote.getKeyProps()[0].int_value;
+                                noteInfoModel.verticalIndexOfVoice=vexFlowNoteIndex;
                             }
                             //noteInfoModel.svgId=note.sourceNote;
                        });
-                       const htmlElement: HTMLElement=document.getElementById(voiceInfoModel.svgId);
-                       const noteheads: HTMLCollectionOf<Element>=htmlElement.getElementsByClassName("vf-notehead");
-                       voiceInfoModel.notes.forEach(note=>{
-                           const path: string=noteheads.item(note.verticalIndexOfVoice).firstElementChild.getAttribute("d");
-                           if(path!==undefined){
-                               note.svgPath=path;
-                           }
-                       });
+                       // const htmlElement: HTMLElement=document.getElementById(voiceInfoModel.svgId);
+                       // const noteheads: HTMLCollectionOf<Element>=htmlElement.getElementsByClassName("vf-notehead");
+                       // voiceInfoModel.notes.forEach(note=>{
+                       //     const path: string=noteheads.item(note.verticalIndexOfVoice).firstElementChild.getAttribute("d");
+                       //     if(path!==undefined){
+                       //         note.svgPath=path;
+                       //     }
+                       // });
                    });
                });
            });
         });
        console.log(sheetMusicInfoModel);
-       // console.log(JSON.stringify(sheetMusicInfoModel));
+       console.log(JSON.stringify(sheetMusicInfoModel));
     }
     /** States whether the render() function can be safely called. */
     public IsReadyToRender(): boolean {
