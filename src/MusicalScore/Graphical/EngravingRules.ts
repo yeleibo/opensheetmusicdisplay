@@ -329,9 +329,9 @@ export class EngravingRules {
         this.CompactMode = false;
         this.PagePlacementEnum = PagePlacementEnum.Down;
         this.PageHeight = 100001.0;
-        this.PageTopMargin = 5.0;
+        this.PageTopMargin = 0.0;
         this.PageTopMarginNarrow = 0.0; // for compact mode
-        this.PageBottomMargin = 5.0;
+        this.PageBottomMargin = 0.0;
         this.PageLeftMargin = 5.0;
         this.PageRightMargin = 5.0;
         this.TitleTopDistance = 5.0;

@@ -3,48 +3,19 @@ import {OpenSheetMusicDisplay} from "../src/OpenSheetMusicDisplay";
 (function () {
 
     const singeLineSvgOption = {
-        autoResize: true,
-        //backend: "canvas",
-        disableCursor: false,
-        drawingParameters:  "default", // try compact (instead of default)
-        drawPartNames: true, // try false
-        // drawTitle: false,
-        // drawSubtitle: false,
-        drawFingerings: true,
-        fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
-        // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
-        setWantedStemDirectionByXml: true, // try false, which was previously the default behavior
+        followCursor: true,
+        drawCredits: false,//作者
+        drawTitle: false,//标题
+        drawSubtitle: false,
+        drawComposer: false,
 
-
-        //drawMeasureNumbers: false, // disable drawing measure numbers
-        //measureNumberInterval: 4, // draw measure numbers only every 4 bars (and at the beginning of a new system)
-        useXMLMeasureNumbers: true, // read measure numbers from xml
-
-        // coloring options
-        coloringEnabled: true,
-        // defaultColorNotehead: "#CC0055", // try setting a default color. default is black (undefined)
-        // defaultColorStem: "#BB0099",
-
-        autoBeam: false, // try true, OSMD Function Test AutoBeam sample
-        autoBeamOptions: {
-            beam_rests: false,
-            beam_middle_rests_only: false,
-            //groups: [[3,4], [1,1]],
-            maintain_stem_directions: false
-        },
-
-        // tupletsBracketed: true, // creates brackets for all tuplets except triplets, even when not set by xml
-        // tripletsBracketed: true,
-        // tupletsRatioed: true, // unconventional; renders ratios for tuplets (3:2 instead of 3 for triplets)
-    }
-    const multiLineSvgOption =  {
         autoResize: false,
         //backend: "canvas",
         disableCursor: false,
-        drawingParameters:  "default", // try compact (instead of default)
+
         drawPartNames: true, // try false
-        // drawTitle: false,
-        // drawSubtitle: false,
+        renderSingleHorizontalStaffline:true, //单行展示
+
         drawFingerings: true,
         fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
         // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
@@ -68,9 +39,44 @@ import {OpenSheetMusicDisplay} from "../src/OpenSheetMusicDisplay";
             maintain_stem_directions: false
         },
 
-        // tupletsBracketed: true, // creates brackets for all tuplets except triplets, even when not set by xml
-        // tripletsBracketed: true,
-        // tupletsRatioed: true, // unconventional; renders ratios for tuplets (3:2 instead of 3 for triplets)
+    }
+    const multiLineSvgOption = {
+        followCursor: true,
+        drawCredits: false,//作者
+        drawTitle: false,//标题
+        drawSubtitle: false,
+        drawComposer: false,
+
+        autoResize: false,
+        //backend: "canvas",
+        disableCursor: false,
+
+        drawPartNames: true, // try false
+        renderSingleHorizontalStaffline:false, //单行展示
+
+        drawFingerings: true,
+        fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
+        // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
+        setWantedStemDirectionByXml: true, // try false, which was previously the default behavior
+
+
+        //drawMeasureNumbers: false, // disable drawing measure numbers
+        //measureNumberInterval: 4, // draw measure numbers only every 4 bars (and at the beginning of a new system)
+        useXMLMeasureNumbers: true, // read measure numbers from xml
+
+        // coloring options
+        coloringEnabled: true,
+        // defaultColorNotehead: "#CC0055", // try setting a default color. default is black (undefined)
+        // defaultColorStem: "#BB0099",
+
+        autoBeam: false, // try true, OSMD Function Test AutoBeam sample
+        autoBeamOptions: {
+            beam_rests: false,
+            beam_middle_rests_only: false,
+            //groups: [[3,4], [1,1]],
+            maintain_stem_directions: false
+        },
+
     }
 
     const singeLineSvgOpenSheetMusicDisplay = new OpenSheetMusicDisplay("singeLineSvg",singeLineSvgOption);

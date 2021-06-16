@@ -28,13 +28,17 @@ export  class StaffInfoModel {
 }
 
 export  class  VoiceInfoModel{
+    public svgId: string;
     //位于分节中的垂直平index
     public verticalIndexOfStaff: number;
     public notes: NoteInfoModel[]=[];
 }
-
+///音符的信息模型
 export  class NoteInfoModel {
     public verticalIndexOfVoice: number;
     public index: number;
-    public svgId: string;
+    public pianoKey: number;
+    //svg的路径
+    public svgPath: string;
 }
+

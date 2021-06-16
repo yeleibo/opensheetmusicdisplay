@@ -31,7 +31,11 @@ import { MusicPartManagerIterator } from "../MusicalScore/MusicParts/MusicPartMa
 import { ITransposeCalculator } from "../MusicalScore/Interfaces/ITransposeCalculator";
 import { NoteEnum } from "../Common/DataObjects/Pitch";
 import {GraphicalMeasure, VexFlowGraphicalNote} from "../MusicalScore/Graphical";
-import StemmableNote = Vex.Flow.StemmableNote;
+import StaveNote = Vex.Flow.StaveNote;
+
+
+
+
 
 
 
@@ -390,18 +394,28 @@ export class OpenSheetMusicDisplay {
                             voiceInfoModel.notes.push(noteInfoModel);
                             noteInfoModel.verticalIndexOfVoice=voice.notes.indexOf(note);
                             if(note instanceof  VexFlowGraphicalNote){
-                              const stemmableNote: StemmableNote=(note as VexFlowGraphicalNote).vfnote[0];
-                                const vexFlowNoteIndex: number=(note as VexFlowGraphicalNote).vfnote[1];
-                                noteInfoModel.svgId= stemmableNote.getAttribute("id");
+                                const gNote: VexFlowGraphicalNote=note as VexFlowGraphicalNote;
+                                const stemmableNote: StaveNote=gNote.vfnote[0] as StaveNote;
+                                const vexFlowNoteIndex: number=gNote.vfnote[1];
+                                voiceInfoModel.svgId= "vf-"+stemmableNote.getAttribute("id");
                                 noteInfoModel.index=vexFlowNoteIndex;
+                                noteInfoModel.pianoKey=stemmableNote.getKeyProps()[0].int_value;
                             }
                             //noteInfoModel.svgId=note.sourceNote;
+                       });
+                       const htmlElement: HTMLElement=document.getElementById(voiceInfoModel.svgId);
+                       const noteheads: HTMLCollectionOf<Element>=htmlElement.getElementsByClassName("vf-notehead");
+                       voiceInfoModel.notes.forEach(note=>{
+                           const path: string=noteheads.item(note.verticalIndexOfVoice).firstElementChild.getAttribute("d");
+                           if(path!==undefined){
+                               note.svgPath=path;
+                           }
                        });
                    });
                });
            });
         });
-       // console.log(sheetMusicInfoModel);
+       console.log(sheetMusicInfoModel);
        // console.log(JSON.stringify(sheetMusicInfoModel));
     }
     /** States whether the render() function can be safely called. */
