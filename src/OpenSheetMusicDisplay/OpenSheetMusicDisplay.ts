@@ -10,10 +10,8 @@ import { CanvasVexFlowBackend } from "./../MusicalScore/Graphical/VexFlow/Canvas
 import { MusicSheet } from "./../MusicalScore/MusicSheet";
 import { Cursor } from "./Cursor";
 import {
-    SheetMusicInfoModel,
-    VoiceInfoModel,
-    StaffInfoModel,
-    NoteInfoModel, VerticalStaffsInfoModel,
+    NoteInfoModel,
+    SheetMusicInfoModel, StaffInfoModel, VerticalStaffsInfoModel, VoiceInfoModel,
 } from "./SheetMusicInfoModel";
 import { MXLHelper } from "../Common/FileIO/Mxl";
 import { AJAX } from "./AJAX";
@@ -28,9 +26,8 @@ import { GraphicalMusicPage } from "../MusicalScore/Graphical/GraphicalMusicPage
 import { MusicPartManagerIterator } from "../MusicalScore/MusicParts/MusicPartManagerIterator";
 import { ITransposeCalculator } from "../MusicalScore/Interfaces/ITransposeCalculator";
 import { NoteEnum } from "../Common/DataObjects/Pitch";
-import StaveNote = Vex.Flow.StaveNote;
-import {SourceMeasure} from "../MusicalScore/VoiceData";
 import {VexFlowGraphicalNote} from "../MusicalScore/Graphical/VexFlow";
+import StaveNote = Vex.Flow.StaveNote;
 
 
 
@@ -364,17 +361,58 @@ export class OpenSheetMusicDisplay {
 
         let ii: number=0;
         this.GraphicSheet.VerticalGraphicalStaffEntryContainers.forEach((element)=>{
+            const verticalStaffsInfoModel: VerticalStaffsInfoModel=new VerticalStaffsInfoModel();
+            verticalStaffsInfoModel.verticalIndexOfSheetMusic=this.GraphicSheet.VerticalGraphicalStaffEntryContainers.indexOf(element);
+            if(isSingeLine){
+                sheetMusicInfoModel.singleLineVerticalStaffsInfoModels.push(verticalStaffsInfoModel);
+            }else{
+                sheetMusicInfoModel.multiLineVerticalStaffsInfoModels.push(verticalStaffsInfoModel);
+            }
             element.StaffEntries.forEach((staff)=>{
+                const staffInfoModel: StaffInfoModel=new StaffInfoModel();
+                verticalStaffsInfoModel.staffs.push(staffInfoModel);
                 ii++;
                 for(let i: number=0;i<this.GraphicSheet.MeasureList.length;i++) {
                     for (let j: number=0; j < this.GraphicSheet.MeasureList[i].length; j++) {
                         for (let m: number=0; m < this.GraphicSheet.MeasureList[i][j].staffEntries.length; m++) {
                             if (this.GraphicSheet.MeasureList[i][j].staffEntries[m] === staff) {
-                                const verticalStaffsInfoModel: VerticalStaffsInfoModel=new VerticalStaffsInfoModel();
                                 verticalStaffsInfoModel.measureIndex=i;
-                                verticalStaffsInfoModel.horizontalIndexOfMeasure=j;
-                                verticalStaffsInfoModel.verticalIndexOfSheetMusic=this.GraphicSheet.VerticalGraphicalStaffEntryContainers.indexOf(element);
-                                sheetMusicInfoModel.singleLineSvgMeasures.push(verticalStaffsInfoModel);
+                                staffInfoModel.horizontalIndexOfVerticalStaffs=j;
+                                staff.graphicalVoiceEntries.forEach(voice=> {
+                                    //解析voice
+                                    const voiceInfoModel: VoiceInfoModel=new VoiceInfoModel();
+                                    voiceInfoModel.verticalIndexOfStaff= staff.graphicalVoiceEntries.indexOf(voice);
+                                    staffInfoModel.voices.push(voiceInfoModel);
+                                    voice.notes.forEach(note=> {
+                                        //解析note
+                                        const  noteInfoModel: NoteInfoModel=new NoteInfoModel();
+                                        voiceInfoModel.notes.push(noteInfoModel);
+                                        noteInfoModel.verticalIndexOfVoice=voice.notes.indexOf(note);
+                                        if(note instanceof  VexFlowGraphicalNote){
+                                            const gNote: VexFlowGraphicalNote=note as VexFlowGraphicalNote;
+                                            const stemmableNote: StaveNote=gNote.vfnote[0] as StaveNote;
+                                            const vexFlowNoteIndex: number=gNote.vfnote[1];
+                                            voiceInfoModel.svgId= "vf-"+stemmableNote.getAttribute("id");
+                                            noteInfoModel.verticalIndexOfVoice=vexFlowNoteIndex;
+                                            noteInfoModel.pianoKey=stemmableNote.getKeyProps()[0].int_value;
+                                        }
+                                        //noteInfoModel.svgId=note.sourceNote;
+                                    });
+                                    const htmlElement: HTMLElement=document.getElementById(voiceInfoModel.svgId);
+                                    const noteheads: HTMLCollectionOf<Element>=htmlElement.getElementsByClassName("vf-notehead");
+                                    voiceInfoModel.notes.forEach(note=>{
+                                        const path: string=noteheads.item(note.verticalIndexOfVoice).firstElementChild.getAttribute("d");
+                                        if(path!==undefined){
+                                            note.svgPath=path;
+                                            const secondMIndex: number=path.indexOf("M",1);
+                                            const sp: string[] =path.substring(0,secondMIndex).split(" ");
+                                            const x: number=Number(sp[0].replace("M",""));
+                                            if(verticalStaffsInfoModel.pathX===undefined || x<verticalStaffsInfoModel.pathX){
+                                                verticalStaffsInfoModel.pathX=x;
+                                            }
+                                        }
+                                    });
+                                });
                             }
                         }
                     }
