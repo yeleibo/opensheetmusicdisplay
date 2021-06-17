@@ -82,12 +82,12 @@ import {OpenSheetMusicDisplay} from "../src/OpenSheetMusicDisplay";
     const singeLineSvgOpenSheetMusicDisplay = new OpenSheetMusicDisplay("singeLineSvg",singeLineSvgOption);
     const multiLineSvgOpenSheetMusicDisplay = new OpenSheetMusicDisplay("singeLineSvg",multiLineSvgOption);
 
-    singeLineSvgOpenSheetMusicDisplay.load('1.小夜曲.musicxml').then( function () {
-            singeLineSvgOpenSheetMusicDisplay.render();
-        },
-        function (e) {
-            errorLoadingOrRenderingSheet(e, "rendering");
-        });
+    // singeLineSvgOpenSheetMusicDisplay.load('1.小夜曲.musicxml').then( function () {
+    //         singeLineSvgOpenSheetMusicDisplay.render();
+    //     },
+    //     function (e) {
+    //         errorLoadingOrRenderingSheet(e, "rendering");
+    //     });
 
     multiLineSvgOpenSheetMusicDisplay.load('1.小夜曲.musicxml').then( function () {
             multiLineSvgOpenSheetMusicDisplay.render();
@@ -110,7 +110,7 @@ import {OpenSheetMusicDisplay} from "../src/OpenSheetMusicDisplay";
 
     const svgInfoBtn = document.getElementById('svgInfo');
     svgInfoBtn.onclick=function () {
-        singeLineSvgOpenSheetMusicDisplay.exportSVGInfo(true);
+        // singeLineSvgOpenSheetMusicDisplay.exportSVGInfo(true);
         multiLineSvgOpenSheetMusicDisplay.exportSVGInfo(false);
     }
 }())
